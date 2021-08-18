@@ -1,0 +1,22 @@
+#import <color_spaces>
+
+function<vec4(vec2)> composition(function<vec4(vec2)> tex, float offset, vec2 direction){
+  return [](vec2 uv) {
+    vec2 st = direction * uv * tex(uv).xy;
+    return vec4(std::hueToRgb(mod(atan(st.y, st.x) + offset, 1.)), 1.);
+  };
+}
+
+vec4 main(function<vec4(vec2)> tex, float offset, vec2 direction, out vec4 o1, out vec4 o2) {
+
+  vec2 uv = fragment(std::getVertexTexCoord());
+  
+  function<vec4(vec2)> c1 = composition(tex, offset, direction);
+  function<vec4(vec2)> c2 = composition(c1, offset, direction);
+  function<vec4(vec2)> c3 = composition(c2, offset, direction);
+
+  o1 = c1(uv);
+  o2 = c2(uv);
+
+  return c3(uv);
+}
